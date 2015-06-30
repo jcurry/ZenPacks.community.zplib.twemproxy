@@ -8,7 +8,7 @@ AUTHOR = "Jane Curry - jane.curry@skills-1st.co.uk"
 LICENSE = "GPLv2"
 NAMESPACE_PACKAGES = ['ZenPacks', 'ZenPacks.community', 'ZenPacks.community.zplib']
 PACKAGES = ['ZenPacks', 'ZenPacks.community', 'ZenPacks.community.zplib', 'ZenPacks.community.zplib.twemproxy']
-INSTALL_REQUIRES = []
+INSTALL_REQUIRES = ['ZenPacks.zenoss.PythonCollector>=1.6.0']
 COMPAT_ZENOSS_VERS = ">=4.0"
 PREV_ZENPACK_NAME = ""
 # STOP_REPLACEMENTS
