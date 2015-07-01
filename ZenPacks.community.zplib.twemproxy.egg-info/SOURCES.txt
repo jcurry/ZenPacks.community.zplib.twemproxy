@@ -8,6 +8,7 @@ ZenPacks.community.zplib.twemproxy.egg-info/dependency_links.txt
 ZenPacks.community.zplib.twemproxy.egg-info/entry_points.txt
 ZenPacks.community.zplib.twemproxy.egg-info/namespace_packages.txt
 ZenPacks.community.zplib.twemproxy.egg-info/not-zip-safe
+ZenPacks.community.zplib.twemproxy.egg-info/requires.txt
 ZenPacks.community.zplib.twemproxy.egg-info/test_info.txt
 ZenPacks.community.zplib.twemproxy.egg-info/top_level.txt
 ZenPacks.community.zplib.twemproxy.egg-info/zenpack_info
