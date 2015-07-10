@@ -32,8 +32,17 @@ class zplibTwemproxyDeviceData(PythonDataSourcePlugin):
 	    )
     @classmethod
     def params(cls, datasource, context):
-        # Don't need any params - zProperties passed as proxy_attributes
-        return
+        # Pass parameter that represents the server's <IP address>:<port>
+        #   as is used for the key to the server dictionary in the raw data
+        # Twemproxy object has string attributes for serverAddress and serverPort
+
+        params = {}
+        
+        params['ipPort'] = ''
+        if hasattr(context, 'serverAddress') and hasattr(context, 'serverPort'):
+            params['ipPort'] = context.serverAddress + ':' + context.serverPort
+
+        return params
 
     @inlineCallbacks
     def collect(self, config):
@@ -54,6 +63,7 @@ class zplibTwemproxyDeviceData(PythonDataSourcePlugin):
 		result.append(data)
 	    #print "Connection closed."
 	    s.close()
+	    log.info('End of netcat. hostname is %s and port is %s \n' % (hostname, port))
 	    return ''.join(result)
 
         data = self.new_data()
@@ -75,51 +85,46 @@ class zplibTwemproxyDeviceData(PythonDataSourcePlugin):
 	    #continue
 	j_data = json.loads(s)
 
-        for datasource in config.datasources:
-       	    for k,v in j_data.iteritems():
-		if isinstance(v, dict):             #got a server pool
-		    #log.info('Pool is %s  datasource id is %s \n' % (k, datasource.datasource))
-		    poolName = k
-		    for k1,v1 in v.iteritems():
-			if isinstance(v1, dict):    # got a server
+        for datasource in config.datasources:   # ie. one per component instance - probably lots
+            #log.info(' Datasource is %s and datasource.component is %s\n' % (datasource.datasource, datasource.component))
+	    if j_data.has_key(datasource.component):
+		# got a pool
+                log.info(' Got a pool %s \n' % (datasource.component))
+                poolDict = j_data[datasource.component]
+		for datapoint_id in (x.id for x in datasource.points):
+		    if not poolDict.has_key(datapoint_id):
+			continue
+		    try:
+			value = poolDict[datapoint_id]
+			#log.info('pool %s datapoint %s datapoint_value %s \n' % (poolName, datapoint_id, v[datapoint_id]))
+		    except Exception, e:
+			log.error('Failed to get value datapoint for pool component, error is %s' % (e))
+			continue
+		    dpname = '_'.join((datasource.datasource, datapoint_id))
+		    data['values'][datasource.component][dpname] = (value, 'N')
 
-                            # Next line just short-circuits for debugging
-                            #continue
+            else:  # datasource.component is not a pool - must be a server
+                ipPort = datasource.params['ipPort']
+                #log.info(' Datasource is %s and ipPort is %s \n' % (datasource.datasource, ipPort))
+                for k,v in j_data.iteritems():
+                    if isinstance(v, dict):    # got a server pool
+			#serverKey = getattr(v, ipPort, None)
+                        if v.has_key(ipPort):
+                            serverDict = v[ipPort]
+                        #log.info('ipPort is %s and serverKey is %s and k is %s and v is %s \n' % (ipPort, serverKey, k, v))
+			#if serverKey:	# got dictionary for server data matching component
+			    #log.info(' Got dictionary for server data matching component %s \n' % (serverDict))
+			    for datapoint_id in (x.id for x in datasource.points):
+				if not serverDict.has_key(datapoint_id):
+				    continue
+				try:
+				    value = serverDict[datapoint_id]
+				except Exception, e:
+				    log.error('Failed to get value datapoint for server component, error is %s' % (e))
+				    continue
+				dpname = '_'.join((datasource.datasource, datapoint_id))
+				data['values'][datasource.component][dpname] = (value, 'N')
+				break
 
-                            sp = k1.split(':')
-			    server_addr = sp[0]
-			    try:
-				servername,serveralias,serveraddresslist = socket.gethostbyaddr(server_addr)
-			    except:
-				servername = server_addr
-			    port = sp[1]
-                            id = servername + '_' + port
-                            #log.info('got server data - datasource.component is %s and serverName is %s and datasource is %s  \n' % (datasource.component, id, datasource.datasource))
-                            if datasource.component == id:
-                                for datapoint_id in (x.id for x in datasource.points):
-                                    if not v1.has_key(datapoint_id):
-                                        continue
-                                    try:
-                                        value = v1[datapoint_id]
-                                    except Exception, e:
-                                        log.error('Failed to get value datapoint for server component, error is %s' % (e))
-                                        continue
-				    dpname = '_'.join((datasource.datasource, datapoint_id))
-				    data['values'][datasource.component][dpname] = (value, 'N')
-			else:
-                            # Then we have pool metrics
-                            #log.info(' Got pool data - datasource.component is %s and poolName is %s and datasource is %s  \n' % (datasource.component, poolName, datasource.datasource))
-                            if datasource.component == poolName:
-				for datapoint_id in (x.id for x in datasource.points):
-                                    if not v.has_key(datapoint_id):
-                                        continue
-				    try:
-					value = v[datapoint_id]
-                                        #log.info('pool %s datapoint %s datapoint_value %s \n' % (poolName, datapoint_id, v[datapoint_id]))
-				    except Exception, e:
-                                        log.error('Failed to get value datapoint for pool component, error is %s' % (e))
-					continue
-				    dpname = '_'.join((datasource.datasource, datapoint_id))
-				    data['values'][datasource.component][dpname] = (value, 'N')
         returnValue(data)
 

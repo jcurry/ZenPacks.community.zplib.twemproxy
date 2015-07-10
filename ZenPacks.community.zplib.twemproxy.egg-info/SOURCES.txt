@@ -20,6 +20,7 @@ ZenPacks/community/zplib/twemproxy/LICENSE.txt
 ZenPacks/community/zplib/twemproxy/__init__.py
 ZenPacks/community/zplib/twemproxy/__init__.pyc
 ZenPacks/community/zplib/twemproxy/dsplugins.py
+ZenPacks/community/zplib/twemproxy/dsplugins.py_20150708
 ZenPacks/community/zplib/twemproxy/dsplugins.pyc
 ZenPacks/community/zplib/twemproxy/zenpack.yaml
 ZenPacks/community/zplib/twemproxy/zenpacklib.py

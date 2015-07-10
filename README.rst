@@ -140,6 +140,8 @@ Change History
 ==============
 * 1.0.0
    * Initial Release
+* 1.0.1
+   * dsplugins.py modified for performance improvements
 
 Screenshots
 ===========
