@@ -63,7 +63,7 @@ class zplibTwemproxyDeviceData(PythonDataSourcePlugin):
 		result.append(data)
 	    #print "Connection closed."
 	    s.close()
-	    log.info('End of netcat. hostname is %s and port is %s \n' % (hostname, port))
+	    #log.info('End of netcat. hostname is %s and port is %s \n' % (hostname, port))
 	    return ''.join(result)
 
         data = self.new_data()
@@ -89,7 +89,7 @@ class zplibTwemproxyDeviceData(PythonDataSourcePlugin):
             #log.info(' Datasource is %s and datasource.component is %s\n' % (datasource.datasource, datasource.component))
 	    if j_data.has_key(datasource.component):
 		# got a pool
-                log.info(' Got a pool %s \n' % (datasource.component))
+                #log.info(' Got a pool %s \n' % (datasource.component))
                 poolDict = j_data[datasource.component]
 		for datapoint_id in (x.id for x in datasource.points):
 		    if not poolDict.has_key(datapoint_id):
@@ -108,11 +108,9 @@ class zplibTwemproxyDeviceData(PythonDataSourcePlugin):
                 #log.info(' Datasource is %s and ipPort is %s \n' % (datasource.datasource, ipPort))
                 for k,v in j_data.iteritems():
                     if isinstance(v, dict):    # got a server pool
-			#serverKey = getattr(v, ipPort, None)
                         if v.has_key(ipPort):
                             serverDict = v[ipPort]
                         #log.info('ipPort is %s and serverKey is %s and k is %s and v is %s \n' % (ipPort, serverKey, k, v))
-			#if serverKey:	# got dictionary for server data matching component
 			    #log.info(' Got dictionary for server data matching component %s \n' % (serverDict))
 			    for datapoint_id in (x.id for x in datasource.points):
 				if not serverDict.has_key(datapoint_id):
@@ -124,7 +122,7 @@ class zplibTwemproxyDeviceData(PythonDataSourcePlugin):
 				    continue
 				dpname = '_'.join((datasource.datasource, datapoint_id))
 				data['values'][datasource.component][dpname] = (value, 'N')
-				break
+  			    break
 
         returnValue(data)
 
